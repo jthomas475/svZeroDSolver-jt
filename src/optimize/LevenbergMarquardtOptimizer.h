@@ -89,6 +89,14 @@ class LevenbergMarquardtOptimizer {
   LevenbergMarquardtOptimizer(Model* model, int num_obs, int num_params,
                               double lambda0, double tol_grad, double tol_inc,
                               int max_iter);
+  
+  State step(const State& state, double time);
+
+  /**
+   * @brief Delete dynamically allocated memory (in class member
+   * SparseSystem<double> system).
+   */
+  void clean();
 
   /**
    * @brief Run the optimization algorithm
@@ -118,6 +126,12 @@ class LevenbergMarquardtOptimizer {
   int num_eqns;
   int num_vars;
   int num_dpoints;
+  int size{0};
+  double atol{0.0};
+  double time_step_size{0.0};
+  Eigen::Matrix<double, Eigen::Dynamic, 1> y_robs;
+  Eigen::Matrix<double, Eigen::Dynamic, 1> dy_robs;
+  SparseSystem system;
 
   double tol_grad;
   double tol_inc;
@@ -126,6 +140,18 @@ class LevenbergMarquardtOptimizer {
   void update_gradient(Eigen::Matrix<double, Eigen::Dynamic, 1>& alpha,
                        std::vector<std::vector<double>>& y_obs,
                        std::vector<std::vector<double>>& dy_obs);
+
+  void update_residual(std::vector<std::vector<double>>& y_obs,
+                       std::vector<std::vector<double>>& dy_obs);
+
+
+  void update_jacobian_inverse(Eigen::SparseMatrix<double> dE_dalpha, 
+                               Eigen::SparseMatrix<double> dF_dalpha, 
+                               Eigen::Matrix<double, Eigen::Dynamic, 1> dC_dalpha,
+                               Eigen::Matrix<double, Eigen::Dynamic, 1> &y,
+                               Eigen::Matrix<double, Eigen::Dynamic, 1> &ydot);
+
+
 
   void update_delta(bool first_step);
 };

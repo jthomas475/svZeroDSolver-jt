@@ -53,6 +53,11 @@ class SparseSystem {
   Eigen::SparseMatrix<double> dC_dy;           ///< System matrix dC/dy
   Eigen::SparseMatrix<double> dC_dydot;        ///< System matrix dC/dydot
   Eigen::Matrix<double, Eigen::Dynamic, 1> C;  ///< System vector C
+  //QUESTION: How do I instantiate these? Since they are dependent on alpha, how do I ensure they represent the change of the matrices given change in alpha? 
+  Eigen::SparseMatrix<double> dE_dalpha; //Derivative of w.r.t. alpha
+  Eigen::SparseMatrix<double> dF_dalpha; //Derivative of F w.r.t. alpha
+  Eigen::Matrix<double, Eigen::Dynamic, 1> dC_dalpha; //Derivative of C w.r.t. alpha
+    
 
   Eigen::SparseMatrix<double> jacobian;  ///< Jacobian of the system
   Eigen::Matrix<double, Eigen::Dynamic, 1>
@@ -88,6 +93,21 @@ class SparseSystem {
    * @param time_coeff_y Coefficent ydot-dependent part of jacobian
    */
   void update_jacobian(double time_coeff_ydot, double time_coeff_y);
+  
+  /**
+   * @brief Update the jacobian of the system for inverse problem
+   * 
+   * 
+   */
+  void update_jacobian_inverse(Eigen::SparseMatrix<double> dE_dalpha, 
+                               Eigen::SparseMatrix<double> dF_dalpha, 
+                               Eigen::Matrix<double, Eigen::Dynamic, 1> dC_dalpha,
+                               Eigen::Matrix<double, Eigen::Dynamic, 1> &y,
+                               Eigen::Matrix<double, Eigen::Dynamic, 1> &ydot);
+
+  
+    
+
 
   /**
    * @brief Solve the system

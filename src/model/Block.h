@@ -59,6 +59,7 @@ struct TripletsContributions {
    * @brief Contributions to dC/dy matrix
    */
   int D{0};
+  //need to put matrix for the matrix derivatives in terms of alpha
 };
 
 class Node;
@@ -154,6 +155,8 @@ class Block {
    * @return std::string Name of the block
    */
   std::string get_name();
+
+  std::string get_type();
 
   /**
    * @brief Update vessel type of the block
@@ -266,6 +269,7 @@ class Block {
       Eigen::Matrix<double, Eigen::Dynamic, 1> &alpha, std::vector<double> &y,
       std::vector<double> &dy);
 
+  
   /**
    * @brief Number of triplets of element
    *

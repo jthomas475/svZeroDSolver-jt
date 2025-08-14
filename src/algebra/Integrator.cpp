@@ -72,7 +72,7 @@ State Integrator::step(const State& old_state, double time) {
     // Update solution-dependent element contribitions
     model->update_solution(system, y_af, ydot_am);
 
-    // Evaluate residual
+    // Evaluate residual - SHOULD YOU CHANGE THIS OR JUST STICK WITH BLOCK?
     system.update_residual(y_af, ydot_am);
 
     // Check termination criterium

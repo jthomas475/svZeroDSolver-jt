@@ -17,6 +17,10 @@ SparseSystem::SparseSystem(int n) {
   jacobian = Eigen::SparseMatrix<double>(n, n);
   residual = Eigen::Matrix<double, Eigen::Dynamic, 1>::Zero(n);
   dydot = Eigen::Matrix<double, Eigen::Dynamic, 1>::Zero(n);
+
+  dE_dalpha = Eigen::SparseMatrix<double>(n, n);
+  dF_dalpha = Eigen::SparseMatrix<double>(n, n);
+  dC_dalpha = Eigen::Matrix<double, Eigen::Dynamic, 1>::Zero(n);
 }
 
 SparseSystem::~SparseSystem() {}
@@ -70,6 +74,17 @@ void SparseSystem::update_jacobian(double time_coeff_ydot,
   jacobian += (E + dC_dydot) * time_coeff_ydot;
   jacobian += (F + dC_dy) * time_coeff_y;
 }
+
+void SparseSystem::update_jacobian_inverse(Eigen::SparseMatrix<double> dE_dalpha, 
+                                           Eigen::SparseMatrix<double> dF_dalpha, 
+                                           Eigen::Matrix<double, Eigen::Dynamic, 1> dC_dalpha,
+                                           Eigen::Matrix<double, Eigen::Dynamic, 1> &y,
+                                           Eigen::Matrix<double, Eigen::Dynamic, 1> &ydot) {
+  jacobian.setZero();
+  jacobian += dE_dalpha * ydot.asDiagonal();
+  jacobian += dF_dalpha * y.asDiagonal();
+  jacobian += dC_dalpha.replicate(1, jacobian.cols()).sparseView();
+  }
 
 void SparseSystem::solve() {
   solver->factorize(jacobian);

@@ -5,7 +5,10 @@
 
 #include "Model.h"
 
-std::string Block::get_name() { return this->model->get_block_name(this->id); }
+
+std::string Block::get_name() { return this-> model-> get_block_name(this->id);}
+
+ // std::string Block::get_type() { return this-> model-> get_block_type(this->get_name());} // come back to this
 
 void Block::update_vessel_type(VesselType type) { vessel_type = type; }
 
@@ -69,4 +72,6 @@ void Block::update_gradient(Eigen::SparseMatrix<double> &jacobian,
                            get_name());
 }
 
+
 TripletsContributions Block::get_num_triplets() { return num_triplets; }
+

@@ -183,6 +183,11 @@ class BloodVesselJunction : public Block {
                        Eigen::Matrix<double, Eigen::Dynamic, 1> &alpha,
                        std::vector<double> &y, std::vector<double> &dy);
 
+  void update_residual(Eigen::SparseMatrix<double> &jacobian,
+                       Eigen::Matrix<double, Eigen::Dynamic, 1> &residual,
+                       Eigen::Matrix<double, Eigen::Dynamic, 1> &alpha,
+                       std::vector<double> &y, std::vector<double> &dy);
+
   /**
    * @brief Number of triplets of element
    *

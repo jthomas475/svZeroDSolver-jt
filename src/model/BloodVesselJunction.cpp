@@ -87,8 +87,26 @@ void BloodVesselJunction::update_gradient(
                         global_param_ids[2 * num_outlets + i]) =
           -fabs(q_out) * q_out;
     }
-
-    residual(global_eqn_ids[0]) -= q_out;
+  }
+}
+void BloodVesselJunction::update_residual(Eigen::SparseMatrix<double> &jacobian,
+    Eigen::Matrix<double, Eigen::Dynamic, 1> &residual,
+    Eigen::Matrix<double, Eigen::Dynamic, 1> &alpha, std::vector<double> &y,
+    std::vector<double> &dy)
+{
+    auto p_in = y[global_var_ids[0]];
+    for (size_t i = 0; i < num_outlets; i++) {
+    auto resistance = alpha[global_param_ids[i]];
+    auto inductance = alpha[global_param_ids[num_outlets + i]];
+    double stenosis_coeff = 0.0;
+    if (global_param_ids.size() / num_outlets > 2) {
+      stenosis_coeff = alpha[global_param_ids[2 * num_outlets + i]];
+    }
+    auto q_out = y[global_var_ids[3 + 2 * i]];
+    auto p_out = y[global_var_ids[2 + 2 * i]];
+    auto dq_out = dy[global_var_ids[3 + 2 * i]];
+    auto stenosis_resistance = stenosis_coeff * fabs(q_out);
+    residual(global_eqn_ids[0]) -= q_out; // governing equation for bloodvesseljunction 
     residual(global_eqn_ids[i + 1]) =
         p_in - p_out - (resistance + stenosis_resistance) * q_out -
         inductance * dq_out;
