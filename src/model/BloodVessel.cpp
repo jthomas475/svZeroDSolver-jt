@@ -9,6 +9,11 @@ void BloodVessel::setup_dofs(DOFHandler &dofhandler) {
 
 void BloodVessel::update_constant(SparseSystem &system,
                                   std::vector<double> &parameters) {
+  if (parameters.empty()) {
+        std::cerr << "Update_constant called with empty parameters" << std::endl;
+        return; // or throw an exception
+    }
+  
   // Get parameters
   double capacitance = parameters[global_param_ids[ParamId::CAPACITANCE]];
   double inductance = parameters[global_param_ids[ParamId::INDUCTANCE]];
@@ -28,6 +33,11 @@ void BloodVessel::update_constant(SparseSystem &system,
   system.F.coeffRef(global_eqn_ids[0], global_var_ids[2]) = -1.0;
   system.F.coeffRef(global_eqn_ids[1], global_var_ids[1]) = 1.0;
   system.F.coeffRef(global_eqn_ids[1], global_var_ids[3]) = -1.0;
+
+  system.dE_dalpha.coeffRef(global_eqn_ids[0], global_var_ids[3]) = -1;
+  system.dE_dalpha.coeffRef(global_eqn_ids[1], global_var_ids[0]) = -1;
+  system.dE_dalpha.coeffRef(global_eqn_ids[1], global_var_ids[1]) = resistance + capacitance;
+  system.dF_dalpha.coeffRef(global_eqn_ids[0], global_var_ids[1]) = -1;
 }
 
 void BloodVessel::update_solution(
@@ -54,6 +64,9 @@ void BloodVessel::update_solution(
 
   system.dC_dydot.coeffRef(global_eqn_ids[1], global_var_ids[1]) =
       stenosis_resistance * 2.0 * capacitance;
+
+  system.dC_dalpha.coeffRef(global_eqn_ids[0]) = fabs(q_in)*-q_in;
+  system.dC_dalpha.coeffRef(global_eqn_ids[1]) = 2*q_in*dq_in*(capacitance+stenosis_coeff);
 }
 
 void BloodVessel::update_gradient(
@@ -96,6 +109,8 @@ void BloodVessel::update_gradient(
         2.0 * capacitance * fabs(y1) * dy1;
   }
 
+  //Check: since you have update_residual, below can be omitted?
+  
   residual(global_eqn_ids[0]) =
       y0 - (resistance + stenosis_resistance) * y1 - y2 - inductance * dy3;
   residual(global_eqn_ids[1]) =

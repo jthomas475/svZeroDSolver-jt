@@ -7,6 +7,24 @@
 LevenbergMarquardtOptimizer::LevenbergMarquardtOptimizer(
     Model* model, int num_obs, int num_params, double lambda0, double tol_grad,
     double tol_inc, int max_iter) {
+  
+  if (!model) {
+      throw std::runtime_error("LevenbergMarquardtOptimizer: model is null!");
+  }
+
+  std::cout << "Constructor initialized:\n" << std::endl;
+
+  size = model->dofhandler.size();
+  system = SparseSystem(size);
+  y_robs = Eigen::Matrix<double, Eigen::Dynamic, 1>(size); // m
+  dy_robs = Eigen::Matrix<double, Eigen::Dynamic, 1>(size);
+  //this->time_step_size = time_step_size;
+  //this->atol = atol;
+  
+  std::cout << "  system size: " << size << "\n" << std::endl;
+  std::cout << "  y_robs size: " << y_robs.size() << "\n" << std::endl;
+  std::cout << "  dy_robs size: " << dy_robs.size() << "\n" << std::endl;
+
   this->model = model;
   this->num_obs = num_obs;
   this->num_params = num_params;
@@ -18,12 +36,27 @@ LevenbergMarquardtOptimizer::LevenbergMarquardtOptimizer(
   this->tol_inc = tol_inc;
   this->max_iter = max_iter;
 
+
   jacobian = Eigen::SparseMatrix<double>(num_dpoints, num_params);
   residual = Eigen::Matrix<double, Eigen::Dynamic, 1>::Zero(num_dpoints);
   mat = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>(num_params,
                                                               num_params);
   vec = Eigen::Matrix<double, Eigen::Dynamic, 1>::Zero(num_params);
+
+
+  std::cout << "  jacobian size: " << jacobian.rows() << " x " << jacobian.cols() << "\n" << std::endl;
+  std::cout << "  residual size: " << residual.size() << "\n" << std::endl;
+
+  std::cerr << "Reserving with num_eqns = " << model->dofhandler.get_num_equations() << std::endl;
+  std::cerr << "Reserving with num_vars = " << model->dofhandler.get_num_variables() << std::endl;
+
+  system.reserve(model);
 }
+
+void LevenbergMarquardtOptimizer::clean() {
+    std::cerr << "Preparing to make system clean: " << std::endl;
+    system.clean();
+  }
 
 Eigen::Matrix<double, Eigen::Dynamic, 1> LevenbergMarquardtOptimizer::run(
     Eigen::Matrix<double, Eigen::Dynamic, 1> alpha,
@@ -31,6 +64,23 @@ Eigen::Matrix<double, Eigen::Dynamic, 1> LevenbergMarquardtOptimizer::run(
     std::vector<std::vector<double>>& dy_obs) {
   for (size_t i = 0; i < max_iter; i++) {
     update_gradient(alpha, y_obs, dy_obs);
+    // create update_residual using system and y_obs and dy_obs
+    model->update_constant(system);
+    model->update_time(system,0.0); //QUESTION: Should I just set 0.0 as current time value or set it to the time_step?
+    model->update_solution(system,y_robs,dy_robs);
+    system.update_residual(y_robs,dy_robs);
+    
+    std::cout << "Calling update_jacobian_inverse...\n" << std::endl;
+    std::cout << "  dE_dalpha: " << system.dE_dalpha.rows() 
+            << " x " << system.dE_dalpha.cols() << "\n" << std::endl;
+    std::cout << "  dF_dalpha: " << system.dF_dalpha.rows() 
+            << " x " << system.dF_dalpha.cols() << "\n" << std::endl;
+    std::cout << "  dC_dalpha: " << system.dC_dalpha.rows() 
+            << " x " << system.dC_dalpha.cols() << "\n" << std::endl;
+    std::cout << "  y_robs: " << y_robs.size() 
+            << " | dy_robs: " << dy_robs.size() << "\n" << std::endl;
+
+    system.update_jacobian_inverse(system.dE_dalpha, system.dF_dalpha, system.dC_dalpha, y_robs, dy_robs);
 
     if (i == 0) {
       update_delta(true);
