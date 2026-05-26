@@ -45,6 +45,8 @@
 #include "WindkesselBC.h"
 #include "debug.h"
 
+#include "ChamberSphere_expmat.h"
+
 /**
  * @brief Model of 0D elements
  *
