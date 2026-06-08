@@ -35,7 +35,8 @@ enum class BlockType {
   open_loop_coronary_var_res_bc = 19,
   blood_vessel_rc = 20,
   chamber_elastance_inductor_exponential = 21,
-  chamber_sphere_expmat = 22
+  chamber_sphere_expmat = 22,
+  valve_binary = 23
 };
 
 /**

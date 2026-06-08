@@ -46,6 +46,7 @@
 #include "debug.h"
 
 #include "ChamberSphere_expmat.h"
+#include "ValveBinary.h"
 
 /**
  * @brief Model of 0D elements

@@ -36,7 +36,8 @@ Model::Model() {
       {"PiecewiseValve", block_factory<PiecewiseValve>()},
       {"LinearElastanceChamber", block_factory<LinearElastanceChamber>()},
       {"ChamberSphere_expmat", block_factory<ChamberSphere_expmat>()},
-      {"BloodVesselRC", block_factory<BloodVesselRC>()}};
+      {"BloodVesselRC", block_factory<BloodVesselRC>()},
+      {"ValveBinary", block_factory<ValveBinary>()}};
 }
 
 Model::~Model() {}
