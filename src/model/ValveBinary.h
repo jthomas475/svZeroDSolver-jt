@@ -175,6 +175,18 @@ class ValveBinary : public Block {
   void update_constant(SparseSystem& system, std::vector<double>& parameters);
 
   /**
+   * @brief Update the time-dependent contributions of the element in a sparse
+   * system
+   *
+   * @param system System to update contributions at
+   * @param parameters Parameters of the model
+   * @param y Current solution
+   */
+  void update_time(SparseSystem& system, std::vector<double>& parameters,
+                    const Eigen::Matrix<double, Eigen::Dynamic, 1>& y);
+
+                  
+  /**
    * @brief Update the solution-dependent contributions of the element in a
    * sparse system
    *

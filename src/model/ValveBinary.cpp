@@ -33,9 +33,21 @@ void ValveBinary::update_constant(SparseSystem& system,
   system.F.coeffRef(global_eqn_ids[2], global_var_ids[4]) = 1.0;
 }
 
-// update_solution updates matrices E and F from E(y,t)*y_dot + F(y,t)*y +
-// c(y,t) = 0 with terms that DO DEPEND ON THE SOLUTION (will change with each
-// time step)
+void ValveBinary::update_time(
+    SparseSystem& system,
+    std::vector<double>& parameters,
+    const Eigen::Matrix<double, Eigen::Dynamic, 1>& y){
+  
+  double p_in = y[global_var_ids[0]];
+  double p_out = y[global_var_ids[2]];
+
+  double Rmin = parameters[global_param_ids[ParamId::RMIN]];
+  double Rmax = parameters[global_param_ids[ParamId::RMAX]];
+
+  system.F.coeffRef(global_eqn_ids[0], global_var_ids[1]) = p_in >= p_out ? Rmin : Rmax; // if value is above isOpen, then the valve is open; otw valve is closed
+}
+
+// is this entirely necessary, if just 
 void ValveBinary::update_solution(
     SparseSystem& system, std::vector<double>& parameters,
     const Eigen::Matrix<double, Eigen::Dynamic, 1>& y,
@@ -48,12 +60,6 @@ void ValveBinary::update_solution(
   double Rmin = parameters[global_param_ids[ParamId::RMIN]];
   double Rmax = parameters[global_param_ids[ParamId::RMAX]];
 
-  double diff = p_in - p_out;
-  size_t isOpen = diff > 0 ? 1: 0; // if value is above isOpen, then the valve is open; otw valve is closed
-
-  if(isOpen){
-
-  }
 
 //   // Helper functions
 // //   double fun_tanh = tanh(steep * (p_out - p_in));
